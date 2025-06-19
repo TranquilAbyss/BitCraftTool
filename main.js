@@ -113,7 +113,7 @@ function SetupHomePage() {
     module.innerText = "Welcome Home"
 
     module.InsertEle(GetDiagram())
-
+    
     return module
 }
 
@@ -135,12 +135,13 @@ function LoadDiagram() {
     })
 
     const diagram = new go.Diagram("myDiagramDiv", {layout: new go.ForceDirectedLayout({ // automatically spread nodes apart
-        defaultElectricalCharge: 20,
+        defaultElectricalCharge: 10,
         defaultSpringLength: 20
       })})
     diagram.model = new go.GraphLinksModel(data, links)
 
     diagram.nodeTemplate = new go.Node('Auto', { // the whole node panel
+        movable: false,
         locationSpot: go.Spot.Center
       })
         .add(
