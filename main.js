@@ -104,7 +104,6 @@ function SetupContent() {
     let homePage = SetupHomePage()
     toolbar.addPage(homePage)
     content.InsertEle(homePage)
-    console.log(recipes)
     LoadDiagram()
 }
 
@@ -175,6 +174,8 @@ function Item(name, teir, profession) {
     item.name = name
     item.teir = teir
     item.profession = profession;
+    item.inputRecipes = []
+    item.outputRecipes = []
     return item
 }
 
@@ -185,6 +186,14 @@ function Recipe(name, itemInputs, itemOutputs) {
     recipe.name = name
     recipe.itemInputs = itemInputs
     recipe.itemOutputs = itemOutputs
+
+    itemOutputs.forEach(item => {
+        item.item.outputRecipes.push(recipe)
+    })
+
+    itemInputs.forEach(item => {
+        item.item.inputRecipes.push(recipe)
+    })
 
     return recipe;
 }
