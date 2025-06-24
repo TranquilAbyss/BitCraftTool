@@ -69,7 +69,10 @@ function LoadData() {
     let GlassVial = Item('Glass Vial', 1, Profession.Masonry)
     let RefiningBrick = Item('Refining Brick', 1, Profession.Masonry)
 
+    let Plank = Item('Plank', 1, Profession.Carpentry)
+    let Timber = Item('Timber', 1, Profession.Carpentry)
     let RefiningPlank = Item('Refining Plank', 1, Profession.Carpentry)
+    let StrippedWood = Item('Stripped Wood', 1, Profession.Carpentry)
     let Bucket = Item('Bucket', 1, Profession.Carpentry)
     let WaterBucket = Item('Water Bucket', 1, Profession.Unknown)
 
@@ -93,23 +96,172 @@ function LoadData() {
     let MetalSolvant = Item('Metal Solvant', 1, Profession.Scholar)
     let LeatherTreatment = Item('Leather Treatment', 1, Profession.Scholar)
 
-    Recipe('Log', [{item: Trunk, quantity: 1}], [{ item: Log, quantityMin: 1, quantityMax: 1 }] )
+    Recipe('Log', [{item: Trunk, quantity: 1}], [{ item: Log, quantityMin: 6, quantityMax: 6 }, { item: Amber, quantityMin: 0, quantityMax: 1 }] )
     Recipe('Bark', [{item: Trunk, quantity: 1}], [{ item: Bark, quantityMin: 1, quantityMax: 1 }] )
     Recipe('Pitch', [{item: TreeSap, quantity: 1}], [{ item: Pitch, quantityMin: 1, quantityMax: 1 }] )
+    Recipe('Stripped Wood', [{item: Log, quantity: 3}], [{ item: StrippedWood, quantityMin: 1, quantityMax: 1 }] )
+    Recipe('Plank', [{item: StrippedWood, quantity: 2}], [{ item: Plank, quantityMin: 1, quantityMax: 1 }] )
+    Recipe('Timber', [{item: Plank, quantity: 20}], [{ item: Timber, quantityMin: 1, quantityMax: 1 }] )
 }
 
 function SetupContent() {
     toolbar = ToolbarModule()
     content.InsertEle(toolbar)
-    let homePage = SetupHomePage()
-    toolbar.addPage(homePage)
-    content.InsertEle(homePage)
+    
+    // let homePage = SetupHomePage()
+    // toolbar.addPage(homePage)
+    // content.InsertEle(homePage)
+
+    let levelingCalc = SetupLevelingCalc()
+    toolbar.addPage(levelingCalc)
+    content.InsertEle(levelingCalc)
+   
+    let crafrtingDiagram = SetupCraftingDiagram()
+    toolbar.addPage(crafrtingDiagram)
+    content.InsertEle(crafrtingDiagram)
     LoadDiagram()
 }
 
 function SetupHomePage() {
     let module = PageModule("Home")
     module.innerText = "Welcome Home"
+    
+    return module
+}
+
+let remainingXP = 0
+function SetupLevelingCalc() {
+    let module = PageModule("Leveling Clac")
+    module.innerText = "Levinging Calc"
+    module.InsertEle(CreateEle('div', {innerText: "How to use: Imagine cutting a tree for a trunk then choping logs and wondering how many more time until next level. Trucks and Logs would be two steps to complete to complete and will be combined at the bottom. If only one step is needed leave step 2 and 3 blank." }))
+    //XP
+    module.InsertEle(CreateEle('p'))
+    let XP = module.InsertEle(CreateEle('div', {id: "XP"}))
+    XP.InsertEle(CreateEle('span', {innerText: " Total Level Required XP: "})) 
+    let totalRequiredXP = CreateEle('input', {id: "TotalRequiredXP", type:"text", value:""})
+    totalRequiredXP.style = "text-align:right"
+    XP.InsertEle(totalRequiredXP)
+    XP.InsertEle(CreateEle('span', {innerText: " Aquired XP: "})) 
+    let currentXP = CreateEle('input', {id: "CurrentXP", type:"text", value:""})
+    currentXP.style = "text-align:right"
+    XP.InsertEle(currentXP)
+    let xpOutput = CreateEle('div', {innerText: "Remaining XP: 0" })
+    XP.InsertEle(xpOutput)
+    totalRequiredXP.oninput = () => CalcXP(totalRequiredXP, currentXP, xpOutput)
+    currentXP.oninput = () => CalcXP(totalRequiredXP, currentXP, xpOutput)
+    module.InsertEle(CreateEle('p'))
+
+    //Step 1 Task
+    let work = module.InsertEle(CreateEle('div', {id: "work"}))
+    work.InsertEle(CreateEle('div', {innerText: "Step 1 Task" }))
+    work.InsertEle(CreateEle('span', {innerText: " XP per action: "}))
+    let actionXP1 = CreateEle('input', {id: "ActionXP", type:"text", value:""})
+    actionXP1.style = "text-align:right"
+    work.InsertEle(actionXP1)
+    work.InsertEle(CreateEle('span', {innerText: " Total Task Work: "}))
+    let totalWork1 = CreateEle('input', {id: "TotalWork", type:"text", value:""})
+    totalWork1.style = "text-align:right"
+    work.InsertEle(totalWork1)
+    work.InsertEle(CreateEle('span', {innerText: " Work per action: "}))
+    let actionWork1 = CreateEle('input', {id: "TotalWork", type:"text", value:""})
+    actionWork1.style = "text-align:right"
+    work.InsertEle(actionWork1)
+    
+    //Task 2
+    work.InsertEle(CreateEle('div', {innerText: "Step 2 Task" }))
+    work.InsertEle(CreateEle('span', {innerText: " XP per action: "}))
+    let actionXP2 = CreateEle('input', {id: "ActionXP", type:"text", value:""})
+    actionXP2.style = "text-align:right"
+    work.InsertEle(actionXP2)
+    work.InsertEle(CreateEle('span', {innerText: " Total Task Work: "}))
+    let totalWork2 = CreateEle('input', {id: "TotalWork", type:"text", value:""})
+    totalWork2.style = "text-align:right"
+    work.InsertEle(totalWork2)
+    work.InsertEle(CreateEle('span', {innerText: " Work per action: "}))
+    let actionWork2 = CreateEle('input', {id: "TotalWork", type:"text", value:""})
+    actionWork2.style = "text-align:right"
+    work.InsertEle(actionWork2)
+    
+    //Task 3
+    work.InsertEle(CreateEle('div', {innerText: "Step 3 Task" }))
+    work.InsertEle(CreateEle('span', {innerText: " XP per action: "}))
+    let actionXP3 = CreateEle('input', {id: "ActionXP", type:"text", value:""})
+    actionXP3.style = "text-align:right"
+    work.InsertEle(actionXP3)
+    work.InsertEle(CreateEle('span', {innerText: " Total Task Work: "}))
+    let totalWork3 = CreateEle('input', {id: "TotalWork", type:"text", value:""})
+    totalWork3.style = "text-align:right"
+    work.InsertEle(totalWork3)
+    work.InsertEle(CreateEle('span', {innerText: " Work per action: "}))
+    let actionWork3 = CreateEle('input', {id: "TotalWork", type:"text", value:""})
+    actionWork3.style = "text-align:right"
+    work.InsertEle(actionWork3)
+
+    let workOutput = CreateEle('div', {innerText: "Number of Tasks to reach level: " + 0 + " (each task give: 0xp)"})
+    work.InsertEle(workOutput)
+    actionXP1.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+    totalWork1.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+    actionWork1.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+
+    actionXP2.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+    totalWork2.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+    actionWork2.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+
+    actionXP3.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+    totalWork3.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+    actionWork3.oninput = () => CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, workOutput)
+
+    return module
+}
+
+function CalcXP(totalRequiredXP, currentXP, output) {
+    remainingXP = parseFloat(totalRequiredXP.value) - parseFloat(currentXP.value)
+    remainingXPText = remainingXP.toLocaleString(
+        undefined, // leave undefined to use the visitor's browser 
+                    // locale or a string like 'en-US' to override it.
+        { minimumFractionDigits: 2 }
+        );
+    output.innerText = "Remaining XP: "+ remainingXPText + "xp"
+}
+
+function CalcWork(actionXP1, actionXP2, actionXP3, totalWork1, totalWork2, totalWork3, actionWork1, actionWork2, actionWork3, output) {
+    actionXP1 = parseFloat(actionXP1.value)
+    totalWork1 = parseFloat(totalWork1.value)
+    actionWork1 = parseFloat(actionWork1.value)
+
+    actionXP2 = parseFloat(actionXP2.value)
+    totalWork2 = parseFloat(totalWork2.value)
+    actionWork2 = parseFloat(actionWork2.value)
+
+    actionXP3 = parseFloat(actionXP3.value)
+    totalWork3 = parseFloat(totalWork3.value)
+    actionWork3 = parseFloat(actionWork3.value)
+
+    let step1XP = (actionXP1 * (totalWork1 / actionWork1))
+    step1XP = isNaN(step1XP) ? 0 : step1XP
+    let step2XP = (actionXP2 * (totalWork2 / actionWork2))
+    step2XP = isNaN(step2XP) ? 0 : step2XP
+    let step3XP = (actionXP3 * (totalWork3 / actionWork3))
+    step3XP = isNaN(step3XP) ? 0 : step3XP
+    let taskXP = step1XP + step2XP + step3XP
+    let remainingTasks = remainingXP / taskXP
+
+    remainingTasks = remainingTasks.toLocaleString(
+        undefined, // leave undefined to use the visitor's browser 
+                    // locale or a string like 'en-US' to override it.
+        { minimumFractionDigits: 2 }
+        );
+    taskXP = taskXP.toLocaleString(
+        undefined, // leave undefined to use the visitor's browser 
+                    // locale or a string like 'en-US' to override it.
+        { minimumFractionDigits: 2 }
+        );
+    output.innerText = "Number of Tasks to reach level: "+ remainingTasks + " (each task give: " + taskXP +"xp)"
+}
+
+function SetupCraftingDiagram() {
+    let module = PageModule("(WIP) Crafting Diagram")
+    module.innerText = "WIP Crafting Diagram"
 
     module.InsertEle(GetDiagram())
     
@@ -127,14 +279,15 @@ function LoadDiagram() {
     recipes.forEach(recipe => {
         recipe.itemInputs.forEach(input => {
             recipe.itemOutputs.forEach(output => {
-                links.push({from: input.item.id , to: output.item.id})
+                let quntity = output.quantityMax != output.quantityMin ? output.quantityMin + "-"+ output.quantityMax : output.quantityMin
+                links.push({from: input.item.id , to: output.item.id, text: input.quantity +" to "+ quntity})
             })
         })
         
     })
 
     const diagram = new go.Diagram("myDiagramDiv", {layout: new go.ForceDirectedLayout({ // automatically spread nodes apart
-        defaultElectricalCharge: 10,
+        defaultElectricalCharge: 20,
         defaultSpringLength: 20
       })})
     diagram.model = new go.GraphLinksModel(data, links)
@@ -151,6 +304,14 @@ function LoadDiagram() {
           new go.TextBlock({ font: 'bold 10pt helvetica, bold arial, sans-serif', margin: 4 })
             .bind('text')
         )
+    diagram.linkTemplate =
+        new go.Link()
+            .add(
+            new go.Shape(),                           // this is the link shape (the line)
+            new go.Shape({ toArrow: "Standard" }),  // this is an arrowhead
+            new go.TextBlock()                        // this is a Link label
+                .bind("text")
+            );
 }
 
 function GetDiagram() {
